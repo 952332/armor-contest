@@ -1,0 +1,266 @@
+{
+  "summary": {
+    "task4": {
+      "name": "相机标定",
+      "improvements": [
+        "重投影误差计算",
+        "标定质量验证",
+        "支持真实棋盘格尺寸"
+      ],
+      "status": "completed"
+    },
+    "task5": {
+      "name": "数字识别",
+      "improvements": [
+        "多尺度模板匹配",
+        "特征匹配",
+        "轮廓匹配",
+        "组合方法"
+      ],
+      "status": "completed"
+    },
+    "task6": {
+      "name": "装甲板检测",
+      "improvements": [
+        "评分机制",
+        "降低数字置信度阈值",
+        "支持无数字验证模式",
+        "改进灯条配对算法"
+      ],
+      "status": "completed"
+    },
+    "task7": {
+      "name": "位姿解算",
+      "improvements": [
+        "使用灯条中心点",
+        "重投影误差验证",
+        "改进距离计算",
+        "位姿可视化"
+      ],
+      "status": "completed"
+    }
+  },
+  "results": {
+    "task4": {
+      "calibration": {
+        "has_calibration": true,
+        "reprojection_error": 0.0004838713245305991,
+        "validation": {
+          "focal_length": {
+            "fx": 120245.53760760304,
+            "fy": 120245.26302485065,
+            "average": 120245.40031622685,
+            "expected_range": [
+              375.5,
+              1502.0
+            ],
+            "valid": false
+          },
+          "principal_point": {
+            "cx": 359.5733731628928,
+            "cy": 269.391322064041,
+            "image_center": [
+              375.5,
+              282.5
+            ],
+            "offset": [
+              15.926626837107221,
+              13.108677935959008
+            ],
+            "valid": true
+          },
+          "distortion": {
+            "coefficients": [
+              0.6844380031086132,
+              3.917554931759632e-06,
+              -0.00043827805645915176,
+              0.0004983131796861655,
+              1.971187743260816e-11
+            ],
+            "valid": true
+          }
+        }
+      }
+    },
+    "task5": {
+      "results": [
+        {
+          "image": "armor.jpg",
+          "numbers_detected": 1,
+          "numbers": [
+            {
+              "digit": "4",
+              "conf": 0.24192611873149872
+            }
+          ]
+        },
+        {
+          "image": "armor_001_normal.jpg",
+          "numbers_detected": 1,
+          "numbers": [
+            {
+              "digit": "9",
+              "conf": 0.3297201097011566
+            }
+          ]
+        },
+        {
+          "image": "armor_002_dark.jpg",
+          "numbers_detected": 1,
+          "numbers": [
+            {
+              "digit": "1",
+              "conf": 0.38674822449684143
+            }
+          ]
+        },
+        {
+          "image": "armor_005_angled.jpg",
+          "numbers_detected": 1,
+          "numbers": [
+            {
+              "digit": "?",
+              "conf": 0.0
+            }
+          ]
+        }
+      ]
+    },
+    "task6": {
+      "results": [
+        {
+          "image": "armor.jpg",
+          "armors_detected": 1,
+          "armors": [
+            {
+              "color": "red",
+              "number": "4",
+              "score": 82.41926118731499,
+              "number_confidence": 0.24192611873149872
+            }
+          ]
+        },
+        {
+          "image": "armor_001_normal.jpg",
+          "armors_detected": 2,
+          "armors": [
+            {
+              "color": "blue",
+              "number": "9",
+              "score": 89.94580164551735,
+              "number_confidence": 0.3297201097011566
+            },
+            {
+              "color": "blue",
+              "number": "9",
+              "score": 64.94580164551735,
+              "number_confidence": 0.3297201097011566
+            }
+          ]
+        },
+        {
+          "image": "armor_002_dark.jpg",
+          "armors_detected": 1,
+          "armors": [
+            {
+              "color": "red",
+              "number": "1",
+              "score": 85.80122336745262,
+              "number_confidence": 0.38674822449684143
+            }
+          ]
+        },
+        {
+          "image": "armor_005_angled.jpg",
+          "armors_detected": 1,
+          "armors": [
+            {
+              "color": "red",
+              "number": "?",
+              "score": 78.0,
+              "number_confidence": 0.0
+            }
+          ]
+        }
+      ]
+    },
+    "task7": {
+      "results": [
+        {
+          "image": "armor.jpg",
+          "pose_estimated": 1,
+          "poses": [
+            {
+              "distance_m": 99.37762693094565,
+              "euler_angles": [
+                12.80852475656778,
+                -0.05888224461799755,
+                -7.105910812482309e-05
+              ],
+              "reprojection_error": 0.2508305013179779,
+              "method": "灯条中心点方法"
+            }
+          ]
+        },
+        {
+          "image": "armor_001_normal.jpg",
+          "pose_estimated": 2,
+          "poses": [
+            {
+              "distance_m": 109.64086354404887,
+              "euler_angles": [
+                21.199719525877786,
+                -9.80857980133558,
+                -8.009750024675778
+              ],
+              "reprojection_error": 9.177177429199219,
+              "method": "灯条中心点方法"
+            },
+            {
+              "distance_m": 30.13679391476757,
+              "euler_angles": [
+                -63.476936751305885,
+                0.010075089742798518,
+                6.67823119991031e-05
+              ],
+              "reprojection_error": 0.2449912130832672,
+              "method": "灯条中心点方法"
+            }
+          ]
+        },
+        {
+          "image": "armor_002_dark.jpg",
+          "pose_estimated": 1,
+          "poses": [
+            {
+              "distance_m": 66.8031186078265,
+              "euler_angles": [
+                0.03392147074046134,
+                34.0792336980125,
+                0.019078171675635608
+              ],
+              "reprojection_error": 0.009460489265620708,
+              "method": "灯条中心点方法"
+            }
+          ]
+        },
+        {
+          "image": "armor_005_angled.jpg",
+          "pose_estimated": 1,
+          "poses": [
+            {
+              "distance_m": 60.87512454343025,
+              "euler_angles": [
+                -40.58921553533507,
+                41.24273269874714,
+                -14.001769503398187
+              ],
+              "reprojection_error": 0.35365888476371765,
+              "method": "灯条中心点方法"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
