@@ -48,7 +48,7 @@ def test_task2():
         print(f"红色像素数: {red_pixels} ({red_pixels/total_pixels*100:.2f}%)")
         print(f"蓝色像素数: {blue_pixels} ({blue_pixels/total_pixels*100:.2f}%)")
         
-        # 方法2：使用第一题的结果
+        # todo 方法2：使用第一题的结果   这里肯定是基于第一题的结果
         print("\n" + "="*60)
         print("方法2：使用第一题的结果进行测试")
         print("="*60)

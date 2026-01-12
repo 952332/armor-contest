@@ -40,7 +40,7 @@ def test_improvements():
     print("=" * 80)
     
     try:
-        # 使用改进后的函数（支持square_size参数）
+        # 使用改进后的函数
         result = task4_camera_calibration(
             calibration_dir,
             chessboard_size=(9, 6),

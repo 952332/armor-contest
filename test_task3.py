@@ -23,7 +23,7 @@ def test_task3():
     print("-" * 60)
     
     try:
-        # 方法1：使用第一题的结果
+        # todo 方法1：使用第一题的结果
         print("\n方法1：使用第一题的结果进行测试")
         result1 = task1_image_preprocessing(image_path, output_dir)
         img_gray = result1["gray"]

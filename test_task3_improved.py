@@ -27,7 +27,7 @@ def compare_versions():
     img_gray = result1["gray"]
     img_bgr = result1["original_bgr"]
     
-    # 获取颜色分割结果（用于改进版）
+    # 获取颜色分割结果
     result2 = task2_color_segmentation(img_bgr, output_dir="output", show_windows=False)
     mask_red = result2["mask_red"]
     mask_blue = result2["mask_blue"]
@@ -103,10 +103,8 @@ def create_comparison_visualization(img_bgr, result_original, result_improved,
     edges_original_3ch = cv2.cvtColor(result_original['edges'], cv2.COLOR_GRAY2BGR)
     edges_improved_3ch = cv2.cvtColor(result_improved['edges'], cv2.COLOR_GRAY2BGR)
     
-    # 第一行
+
     row1 = np.hstack([img_bgr, mask_3ch, edges_original_3ch])
-    
-    # 第二行
     row2 = np.hstack([edges_improved_3ch, result_original['result_image'], 
                      result_improved['result_image']])
     
@@ -120,8 +118,7 @@ def create_comparison_visualization(img_bgr, result_original, result_improved,
     row2_resized = cv2.resize(row2, (new_w, new_h2))
     
     combined = np.vstack([row1_resized, row2_resized])
-    
-    # 添加标签
+
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.7
     thickness = 2
@@ -217,8 +214,7 @@ def test_multiple_images():
         
         print(f"  原版: {len(result_orig['valid_lines'])}条 (L:{len(result_orig['left_bars'])} R:{len(result_orig['right_bars'])})")
         print(f"  改进版: {len(result_imp['valid_lines'])}条 (L:{len(result_imp['left_bars'])} R:{len(result_imp['right_bars'])})")
-    
-    # 打印总结
+
     print("\n" + "="*80)
     print("测试总结")
     print("="*80)

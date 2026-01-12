@@ -10,27 +10,22 @@ from typing import Tuple, List, Optional, Dict
 import json
 
 
-# ============================================================================
 # 题目 1：基础图像读取与预处理
-# ============================================================================
 
 def task1_image_preprocessing(image_path: str, output_dir: str = "output") -> Dict[str, np.ndarray]:
     """
     题目1：基础图像读取与预处理
 
-    实现思路：
     1. 使用cv2.imread读取BGR格式图像
     2. 使用cv2.cvtColor将BGR转换为RGB和GRAY
     3. 使用高斯滤波或中值滤波降低噪声
     4. 显示并保存处理后的图像
 
-    考核点：OpenCV图像读写、色彩空间转换、基础滤波操作
     """
     print("=" * 60)
     print("题目1：基础图像读取与预处理")
     print("=" * 60)
 
-    # 创建输出目录
     os.makedirs(output_dir, exist_ok=True)
 
     # 1. 读取图像（BGR格式）
@@ -46,19 +41,19 @@ def task1_image_preprocessing(image_path: str, output_dir: str = "output") -> Di
     # 3. BGR转灰度图
     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
 
-    # 4. 对灰度图进行滤波处理（高斯滤波，降低噪声）
+    # 4. 对灰度图进行滤波处理--高斯
     # 高斯滤波参数：(5,5)是核大小，0是标准差（自动计算）
     img_blurred = cv2.GaussianBlur(img_gray, (5, 5), 0)
 
-    # 也可以使用中值滤波（对椒盐噪声效果更好）
+    # 可以备选项中值滤波
     # img_blurred = cv2.medianBlur(img_gray, 5)
 
-    # 5. 显示图像（注意：OpenCV显示需要BGR格式）
+    # 5. 显示图像
     cv2.imshow("原始图像 (BGR)", img_bgr)
     cv2.imshow("灰度图像", img_gray)
     cv2.imshow("模糊后的图像", img_blurred)
 
-    print("按任意键关闭窗口...")
+    # print("按任意键关闭窗口...")
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
@@ -74,33 +69,28 @@ def task1_image_preprocessing(image_path: str, output_dir: str = "output") -> Di
         "blurred": img_blurred
     }
 
-
-# ============================================================================
 # 题目 2：颜色识别与阈值分割
-# ============================================================================
 
 def task2_color_segmentation(img_bgr: np.ndarray, output_dir: str = "output", 
                              show_windows: bool = True) -> Dict[str, np.ndarray]:
     """
     题目2：颜色识别与阈值分割
 
-    实现思路：
     1. 将BGR图像转换为HSV颜色空间（HSV对光照变化更鲁棒）
     2. 定义红色和蓝色的HSV阈值范围（需要根据实际情况调整）
     3. 使用cv2.inRange创建颜色掩码
     4. 使用形态学开运算（先腐蚀后膨胀）去除小噪声点
     5. 显示分割后的红蓝区域
 
-    考核点：HSV颜色空间、阈值分割、形态学操作
     
     参数:
         img_bgr: BGR格式的输入图像
         output_dir: 输出目录
         show_windows: 是否显示窗口（默认True，自动化测试时可设为False）
     """
-    print("=" * 60)
-    print("题目2：颜色识别与阈值分割")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("题目2：颜色识别与阈值分割")
+    # print("=" * 60)
 
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
@@ -109,7 +99,6 @@ def task2_color_segmentation(img_bgr: np.ndarray, output_dir: str = "output",
     img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
 
     # 2. 定义红色HSV阈值范围
-    # 红色在HSV中跨越0度，需要两个范围
     # 范围1: [0, 50, 50] 到 [10, 255, 255] (红色低值)
     # 范围2: [170, 50, 50] 到 [180, 255, 255] (红色高值)
     lower_red1 = np.array([0, 50, 50])
@@ -122,7 +111,7 @@ def task2_color_segmentation(img_bgr: np.ndarray, output_dir: str = "output",
     lower_blue = np.array([100, 50, 50])
     upper_blue = np.array([130, 255, 255])
 
-    # 4. 创建红色掩码（两个范围合并）
+    # 4. 创建红色掩码
     mask_red1 = cv2.inRange(img_hsv, lower_red1, upper_red1)
     mask_red2 = cv2.inRange(img_hsv, lower_red2, upper_red2)
     mask_red = cv2.bitwise_or(mask_red1, mask_red2)
@@ -130,21 +119,20 @@ def task2_color_segmentation(img_bgr: np.ndarray, output_dir: str = "output",
     # 5. 创建蓝色掩码
     mask_blue = cv2.inRange(img_hsv, lower_blue, upper_blue)
 
-    # 6. 形态学开运算（先腐蚀后膨胀，消除小噪声）
-    # 创建结构元素（核）
+    # 6. 形态学开运算
     kernel = np.ones((5, 5), np.uint8)
 
-    # 对红色掩码进行开运算
+    # 红色掩码
     mask_red_opened = cv2.morphologyEx(mask_red, cv2.MORPH_OPEN, kernel)
 
-    # 对蓝色掩码进行开运算
+    # 蓝色掩码
     mask_blue_opened = cv2.morphologyEx(mask_blue, cv2.MORPH_OPEN, kernel)
 
-    # 7. 提取红蓝区域（在原图上应用掩码）
+    # 7. 提取红蓝区域
     img_red_region = cv2.bitwise_and(img_bgr, img_bgr, mask=mask_red_opened)
     img_blue_region = cv2.bitwise_and(img_bgr, img_bgr, mask=mask_blue_opened)
 
-    # 8. 显示结果（可选）
+    # 8. 显示结果
     if show_windows:
         cv2.imshow("原始图像", img_bgr)
         cv2.imshow("红色掩码", mask_red_opened)
@@ -152,7 +140,7 @@ def task2_color_segmentation(img_bgr: np.ndarray, output_dir: str = "output",
         cv2.imshow("红色区域", img_red_region)
         cv2.imshow("蓝色区域", img_blue_region)
 
-        print("按任意键关闭窗口...")
+        # print("按任意键关闭窗口...")
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -172,42 +160,35 @@ def task2_color_segmentation(img_bgr: np.ndarray, output_dir: str = "output",
         "blue_region": img_blue_region
     }
 
-
-# ============================================================================
 # 题目 3：装甲板灯条提取
-# ============================================================================
 
 def task3_light_bar_extraction(img_gray: np.ndarray, img_bgr: np.ndarray,
                                output_dir: str = "output", show_windows: bool = True) -> Dict[str, any]:
     """
     题目3：装甲板灯条提取
 
-    实现思路：
     1. 使用Canny边缘检测获取边缘信息
     2. 使用霍夫变换检测直线（HoughLinesP更适合检测线段）
     3. 根据灯条特征筛选直线：
-       - 长度要求（最小长度阈值）
-       - 角度要求（灯条通常是垂直或接近垂直的）
-       - 位置关系（左右灯条应该大致平行）
+       - 长度要求
+       - 角度要求
+       - 位置关系
     4. 将符合条件的直线合并为灯条区域
     5. 在原图上绘制检测到的灯条
-
-    考核点：边缘检测、霍夫变换、轮廓筛选与几何特征分析
-    
     参数:
         img_gray: 灰度图像
         img_bgr: BGR格式的原始图像
         output_dir: 输出目录
         show_windows: 是否显示窗口（默认True，自动化测试时可设为False）
     """
-    print("=" * 60)
-    print("题目3：装甲板灯条提取")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("题目3：装甲板灯条提取")
+    # print("=" * 60)
 
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
-    # 1. 边缘检测（Canny算法）
+    # 1. 边缘检测
     # 参数：图像，低阈值，高阈值
     edges = cv2.Canny(img_gray, 50, 150)
 
@@ -233,10 +214,10 @@ def task3_light_bar_extraction(img_gray: np.ndarray, img_bgr: np.ndarray,
         for line in lines:
             x1, y1, x2, y2 = line[0]
 
-            # 计算线段长度
+            # 计算线段长
             length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-            # 计算角度（转换为度数）
+            # 计算角度
             angle = np.arctan2(y2 - y1, x2 - x1) * 180 / np.pi
             # 标准化角度到[-90, 90]
             if angle > 90:
@@ -245,8 +226,8 @@ def task3_light_bar_extraction(img_gray: np.ndarray, img_bgr: np.ndarray,
                 angle += 180
 
             # 筛选条件：
-            # - 长度大于阈值（例如30像素）
-            # - 角度接近垂直（例如70-90度或-70到-90度）
+            # - 长度大于阈值
+            # - 角度接近垂直
             min_length = 30
             angle_threshold = 20  # 允许偏离垂直方向的角度
 
@@ -280,7 +261,7 @@ def task3_light_bar_extraction(img_gray: np.ndarray, img_bgr: np.ndarray,
             else:
                 right_bars.append(line_info)
 
-    # 5. 合并灯条区域（绘制外接矩形）
+    # 5. 合并灯条区域
     img_with_bars = img_bgr.copy()
 
     # 绘制左灯条区域
@@ -309,7 +290,7 @@ def task3_light_bar_extraction(img_gray: np.ndarray, img_bgr: np.ndarray,
             cv2.putText(img_with_bars, "Right Bar", (x, y - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
-    # 6. 显示结果（可选）
+    # 6. 显示结果
     if show_windows:
         cv2.imshow("边缘检测", edges)
         cv2.imshow("检测到的直线", img_with_lines)
@@ -334,9 +315,7 @@ def task3_light_bar_extraction(img_gray: np.ndarray, img_bgr: np.ndarray,
     }
 
 
-# ============================================================================
 # 题目 4：相机标定与畸变矫正
-# ============================================================================
 
 def task4_camera_calibration(calibration_images_dir: str,
                              chessboard_size: Tuple[int, int] = (9, 6),
@@ -347,17 +326,14 @@ def task4_camera_calibration(calibration_images_dir: str,
     """
     题目4：相机标定与畸变矫正
 
-    实现思路：
     1. 遍历标定图像目录，读取所有棋盘格图像
     2. 使用cv2.findChessboardCorners检测每张图像的角点
-    3. 准备3D世界坐标点（假设棋盘格在z=0平面上）
+    3. 准备3D世界坐标点
     4. 使用cv2.calibrateCamera计算相机内参矩阵和畸变系数
     5. 计算重投影误差评估标定质量
     6. 验证标定结果的合理性
     7. 使用cv2.undistort对目标图像进行畸变矫正
     8. 显示矫正前后的对比图
-
-    考核点：相机标定原理、OpenCV标定函数、畸变矫正、质量评估
     
     参数:
         calibration_images_dir: 标定图像目录
@@ -367,9 +343,9 @@ def task4_camera_calibration(calibration_images_dir: str,
         output_dir: 输出目录
         show_windows: 是否显示窗口
     """
-    print("=" * 60)
-    print("题目4：相机标定与畸变矫正")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("题目4：相机标定与畸变矫正")
+    # print("=" * 60)
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -392,7 +368,7 @@ def task4_camera_calibration(calibration_images_dir: str,
     if not calibration_images:
         print(f"警告：标定图像目录为空: {calibration_images_dir}")
         print("使用默认内参矩阵（需要实际标定数据）")
-        # 使用默认内参（需要根据实际相机调整）
+        # 使用默认内参
         camera_matrix = np.array([[800, 0, 320],
                                   [0, 800, 240],
                                   [0, 0, 1]], dtype=np.float32)
@@ -418,7 +394,7 @@ def task4_camera_calibration(calibration_images_dir: str,
                 corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
                 imgpoints.append(corners2)
 
-                # 可视化角点检测结果（可选）
+                # 可视化角点检测结果
                 if show_windows:
                     img_with_corners = cv2.drawChessboardCorners(img.copy(), chessboard_size, corners2, ret)
                     cv2.imshow(f"角点检测: {os.path.basename(img_path)}", img_with_corners)
@@ -453,7 +429,7 @@ def task4_camera_calibration(calibration_images_dir: str,
             print(f"相机内参矩阵:\n{camera_matrix}")
             print(f"畸变系数:\n{dist_coeffs}")
 
-            # 4. 计算重投影误差（评估标定质量）
+            # 4. 计算重投影误差
             total_error = 0.0
             per_image_errors = []
             
@@ -541,7 +517,7 @@ def task4_camera_calibration(calibration_images_dir: str,
             print(f"    合理性: {'OK' if validation_results['principal_point']['valid'] else 'FAIL'}")
             print(f"  畸变系数合理性: {'OK' if dist_valid else 'FAIL'}")
 
-            # 保存标定结果（包含质量评估）
+            # 保存标定结果
             calibration_data = {
                 "camera_matrix": camera_matrix.tolist(),
                 "dist_coeffs": dist_coeffs.tolist(),
@@ -563,7 +539,7 @@ def task4_camera_calibration(calibration_images_dir: str,
         # 使用标定结果进行畸变矫正
         h, w = img_bgr.shape[:2]
 
-        # 获取最优新相机矩阵（可选，用于裁剪图像）
+        # 获取最优新相机矩阵
         new_camera_matrix, roi = cv2.getOptimalNewCameraMatrix(
             camera_matrix, dist_coeffs, (w, h), 1, (w, h))
 
@@ -604,9 +580,7 @@ def task4_camera_calibration(calibration_images_dir: str,
         }
 
 
-# ============================================================================
 # 题目 5：装甲板数字识别
-# ============================================================================
 
 def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: List,
                              output_dir: str = "output",
@@ -615,7 +589,7 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
     """
     题目5：装甲板数字识别
 
-    实现思路：
+
     1. 基于灯条位置定位数字区域（两条灯条之间的区域）
     2. 对数字区域进行预处理：
        - 转换为灰度图
@@ -628,7 +602,6 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
        - 找到最佳匹配位置和置信度
     4. 在原图上绘制数字区域和识别结果
 
-    考核点：数字区域定位、字符预处理、模板/特征匹配、识别鲁棒性
     """
     print("=" * 60)
     print("题目5：装甲板数字识别")
@@ -636,7 +609,7 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
 
     os.makedirs(output_dir, exist_ok=True)
 
-    # 1. 定位数字区域（基于灯条位置）
+    # 1. 定位数字区域
     number_regions = []
 
     if len(left_bars) > 0 and len(right_bars) > 0:
@@ -717,7 +690,7 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
         recognized_digit = "?"
         confidence = 0.0
 
-        # 如果模板存在，使用模板匹配
+        #使用模板匹配
         if templates:
             best_match = -1
             best_confidence = 0.0
@@ -740,7 +713,6 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
                 recognized_digit = str(best_match)
                 confidence = best_confidence
             else:
-                # 如果模板匹配失败，尝试简化方法
                 pass
         else:
             # 简化方法：基于轮廓特征
@@ -773,7 +745,7 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
         cv2.putText(img_result, f"{recognized_digit} ({confidence:.2f})",
                     (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-    # 5. 显示结果（可选）
+    # 5. 显示结果
     if show_windows:
         cv2.imshow("数字识别结果", img_result)
         print("按任意键关闭窗口...")
@@ -793,10 +765,7 @@ def task5_number_recognition(img_bgr: np.ndarray, left_bars: List, right_bars: L
         "result_image": img_result
     }
 
-
-# ============================================================================
 # 题目 6：装甲板轮廓匹配与识别
-# ============================================================================
 
 def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List,
                           mask_red: np.ndarray, mask_blue: np.ndarray,
@@ -817,7 +786,6 @@ def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List
     4. 提取装甲板主体（灯条之间的区域）
     5. 根据颜色分割结果判断装甲板颜色
 
-    考核点：几何特征匹配、目标检测、多步骤结果融合
     """
     print("=" * 60)
     print("题目6：装甲板轮廓匹配与识别")
@@ -833,7 +801,7 @@ def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List
         for right_bar in right_bars:
             # 检查几何特征匹配
 
-            # 1.1 角度相似性（灯条应该大致平行）
+            # 1.1 角度相似性
             angle_diff = abs(left_bar['angle'] - right_bar['angle'])
             if angle_diff > 15:  # 角度差超过15度，不匹配
                 continue
@@ -844,7 +812,7 @@ def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List
             if length_ratio < 0.7:  # 长度比例小于0.7，不匹配
                 continue
 
-            # 1.3 间距检查（灯条之间的水平距离应该合理）
+            # 1.3 间距检查
             left_center_x = left_bar['center'][0]
             right_center_x = right_bar['center'][0]
             distance = abs(right_center_x - left_center_x)
@@ -854,7 +822,7 @@ def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List
             if distance < avg_length * 0.5 or distance > avg_length * 3:
                 continue
 
-            # 1.4 垂直位置（灯条应该在相似的高度）
+            # 1.4 垂直位置
             left_center_y = left_bar['center'][1]
             right_center_y = right_bar['center'][1]
             y_diff = abs(left_center_y - right_center_y)
@@ -886,7 +854,7 @@ def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List
                 left_x1, left_y1, left_x2, left_y2 = left_bar['line']
                 right_x1, right_y1, right_x2, right_y2 = right_bar['line']
 
-                # 装甲板区域（包含左右灯条）
+                # 装甲板区域
                 armor_x = min(left_x1, left_x2)
                 armor_y = min(left_y1, left_y1, right_y1, right_y2)
                 armor_x2 = max(right_x1, right_x2)
@@ -943,17 +911,13 @@ def task6_armor_detection(img_bgr: np.ndarray, left_bars: List, right_bars: List
         "result_image": img_result
     }
 
-
-# ============================================================================
 # 题目 7：位姿解算
-# ============================================================================
 
 def task7_pose_estimation(armor_info: Dict, camera_matrix: np.ndarray,
                           dist_coeffs: np.ndarray, output_dir: str = "output") -> Dict[str, any]:
     """
     题目7：位姿解算
 
-    实现思路：
     1. 定义装甲板的3D模型坐标（世界坐标系）
        - 假设装甲板在z=0平面上
        - 定义灯条中心点和装甲板四角的3D坐标
@@ -964,11 +928,10 @@ def task7_pose_estimation(armor_info: Dict, camera_matrix: np.ndarray,
     4. 将旋转向量转换为旋转矩阵
     5. 计算相机到装甲板的距离
 
-    考核点：位姿解算、相机坐标系与世界坐标系转换
     """
-    print("=" * 60)
-    print("题目7：位姿解算")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("题目7：位姿解算")
+    # print("=" * 60)
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -1023,7 +986,7 @@ def task7_pose_estimation(armor_info: Dict, camera_matrix: np.ndarray,
     distance_cm = distance_mm / 10
     distance_m = distance_mm / 1000
 
-    # 6. 计算欧拉角（可选，用于更直观的角度表示）
+    # 6. 计算欧拉角
     # 从旋转矩阵提取欧拉角
     sy = np.sqrt(rotation_matrix[0, 0] ** 2 + rotation_matrix[1, 0] ** 2)
     singular = sy < 1e-6
@@ -1070,16 +1033,11 @@ def task7_pose_estimation(armor_info: Dict, camera_matrix: np.ndarray,
         "euler_angles": euler_angles
     }
 
-
-# ============================================================================
 # 题目 8：动态目标跟踪
-# ============================================================================
 
 def task8_object_tracking(video_path: str, output_dir: str = "output") -> Dict[str, any]:
     """
     题目8：动态目标跟踪
-
-    实现思路：
     1. 使用cv2.VideoCapture读取视频流
     2. 对每一帧应用题目6的装甲板识别算法
     3. 选择合适的跟踪算法：
@@ -1088,11 +1046,10 @@ def task8_object_tracking(video_path: str, output_dir: str = "output") -> Dict[s
     4. 记录跟踪过程中装甲板的中心坐标
     5. 绘制轨迹图
 
-    考核点：视频处理、目标跟踪算法、多帧结果关联
     """
-    print("=" * 60)
-    print("题目8：动态目标跟踪")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("题目8：动态目标跟踪")
+    # print("=" * 60)
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -1109,7 +1066,7 @@ def task8_object_tracking(video_path: str, output_dir: str = "output") -> Dict[s
 
     print(f"视频信息: {width}x{height}, {fps} FPS")
 
-    # 2. 初始化跟踪器（使用CSRT跟踪器，效果较好）
+    # 2. 初始化跟踪器
     tracker = None
     tracking = False
 
@@ -1128,7 +1085,7 @@ def task8_object_tracking(video_path: str, output_dir: str = "output") -> Dict[s
         frame_count += 1
         frame_result = frame.copy()
 
-        # 对每一帧进行装甲板检测（简化版本，实际需要调用完整的检测流程）
+        # 对每一帧进行装甲板检测（
         # 这里使用简单的目标检测作为示例
 
         if not tracking:
@@ -1190,7 +1147,7 @@ def task8_object_tracking(video_path: str, output_dir: str = "output") -> Dict[s
     print(f"处理了 {frame_count} 帧")
     print(f"记录了 {len(trajectories)} 条轨迹")
 
-    # 绘制轨迹图（使用matplotlib，如果可用）
+    # 绘制轨迹图
     try:
         import matplotlib.pyplot as plt
 
@@ -1219,16 +1176,12 @@ def task8_object_tracking(video_path: str, output_dir: str = "output") -> Dict[s
     }
 
 
-# ============================================================================
 # 题目 9：装甲板位置预测与综合实战
-# ============================================================================
 
 def task9_comprehensive_system(video_path: str, calibration_images_dir: str = None,
                                output_dir: str = "output") -> Dict[str, any]:
     """
     题目9：装甲板位置预测与综合实战
-
-    实现思路：
     1. 整合题目2-8的所有算法，实现完整流程：
        - 图像预处理
        - 颜色分割
@@ -1250,7 +1203,7 @@ def task9_comprehensive_system(video_path: str, calibration_images_dir: str = No
 
     os.makedirs(output_dir, exist_ok=True)
 
-    # 1. 相机标定（如果提供了标定图像）
+    # 1. 相机标定
     camera_matrix = None
     dist_coeffs = None
 
@@ -1426,18 +1379,15 @@ def task9_comprehensive_system(video_path: str, calibration_images_dir: str = No
         "summary": summary
     }
 
-
-# ============================================================================
 # 主函数 - 示例使用
-# ============================================================================
 
 def main():
     """
     主函数：演示如何使用各个题目函数
     """
-    print("=" * 60)
-    print("机甲大师二轮考核 - 装甲板识别与跟踪系统")
-    print("=" * 60)
+    # print("=" * 60)
+    # print("机甲大师二轮考核 - 装甲板识别与跟踪系统")
+    # print("=" * 60)
 
     # 配置路径（需要根据实际情况修改）
     image_path = "test_images/armor.jpg"  # 装甲板图像路径
